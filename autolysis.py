@@ -1,5 +1,4 @@
 from dotenv import load_dotenv
-from tenacity import retry, wait_fixed, stop_after_attempt
 import argparse
 import os
 import pandas as pd
@@ -41,8 +40,11 @@ readers = {
     'sql': pd.read_sql,  # Requires a SQLAlchemy engine
 }
 
-@retry(wait=wait_fixed(2), stop=stop_after_attempt(5))
-def read_dataset(file_path, file_extension):
+# Determine the file extension
+file_extension = file_path.split('.')[-1]
+
+# Read the dataset dynamically
+try:
     if file_extension in readers:
         if file_extension == 'sql':
             print("Reading from SQL databases requires a connection string. Please modify the code to provide it.")
@@ -50,18 +52,15 @@ def read_dataset(file_path, file_extension):
         else:
             # Try reading with utf-8 first, if it fails, catch the exception and try with a different encoding
             try:
-                return readers[file_extension](file_path)
+                df = readers[file_extension](file_path)
             except UnicodeDecodeError:
-                return readers[file_extension](file_path, encoding='ISO-8859-1')
+                #print("UTF-8 decoding failed, trying ISO-8859-1 encoding.")
+                df = readers[file_extension](file_path, encoding='ISO-8859-1')
     else:
-        raise ValueError("Unsupported file format. Please provide a valid dataset file.")
-    
-# Read the dataset dynamically
-try:
-    file_extension = file_path.split('.')[-1]
-    df = read_dataset(file_path, file_extension)
+        print("Unsupported file format. Please provide a valid dataset file.")
+        exit()
 except Exception as e:
-    print(f"An error occurred while reading the dataset: {e}")
+    print(f"An error occurred: {e}")
     exit()
 
 # Your existing content
@@ -283,25 +282,17 @@ print("Summary saved to README.md")
 
 data = f"The dataset consists of {df.shape[0]} records and {df.shape[1]} columns: {', '.join(df.columns)}."
 
-# Retry decorator for sending API requests
-@retry(wait=wait_fixed(2), stop=stop_after_attempt(5))
-def send_api_request(data):
-    # Prepare API request
-    json_data = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": content},
-            {"role": "user", "content": data}
-        ],
-        "functions": functions,
-        "function_call": {"name": "get_column_type"}
-    }
-    r = requests.post(url=url, headers=headers, json=json_data)
-    r.raise_for_status()  # Raise an error for bad responses
-    return json.loads(r.json()['choices'][0]['message']['function_call']['arguments'])['column_metadata']
+# Prepare API request
+json_data = {
+    "model": model,
+    "messages": [
+        {"role": "system", "content": content},
+        {"role": "user", "content": data}
+    ],
+    "functions": functions,
+    "function_call": {"name": "get_column_type"}
+}
 
 # Send request
-try:
-    metadata = send_api_request(data)
-except Exception as e:
-    print(f"An error occurred while sending the API request: {e}")
+r = requests.post(url=url, headers=headers, json=json_data)
+metadata = json.loads(r.json()['choices'][0]['message']['function_call']['arguments'])['column_metadata']
