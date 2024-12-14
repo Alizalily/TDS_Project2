@@ -20,14 +20,14 @@ if not api_key:
     exit()
 
 # Argument parser for command-line input
-#parser = argparse.ArgumentParser(description='Analyze a dataset and generate insights.')
-#parser.add_argument('file_path', type=str, help='The file path of the dataset (e.g., dataset.csv)')
+parser = argparse.ArgumentParser(description='Analyze a dataset and generate insights.')
+parser.add_argument('file_path', type=str, help='The file path of the dataset (e.g., dataset.csv)')
 
-#args = parser.parse_args()
-#file_path = args.file_path
+args = parser.parse_args()
+file_path = args.file_path
 
 # User input for file path
-file_path = input("Enter the file path of your dataset (e.g., 'house-rent.csv'): ")
+#file_path = input("Enter the file path of your dataset (e.g., 'house-rent.csv'): ")
 
 # Dictionary mapping file extensions to their respective read functions
 readers = {
