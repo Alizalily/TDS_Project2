@@ -1,3 +1,14 @@
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#   "requests",
+#   "pandas",
+#   "matplotlib",
+#   "seaborn",
+#   "python-dotenv",
+# ]
+# ///
+
 from dotenv import load_dotenv
 import argparse
 import os
