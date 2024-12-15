@@ -20,11 +20,13 @@ import seaborn as sns
 
 # Ensure the script's directory is the working directory
 script_dir = os.path.dirname(os.path.abspath(__file__))
+print("Current Working Directory:", os.getcwd())
 os.chdir(script_dir)
 
 # Create output directory
-output_dir = "output"
+output_dir = os.path.join(script_dir, "output")
 os.makedirs(output_dir, exist_ok=True)
+print(f"Output Directory: {output_dir}")
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -234,11 +236,11 @@ else:
 # Remove the unused subplot for a cleaner layout (bottom right)
 axs[1, 1].remove()  # Bottom-right subplot removed for balance
 
-# Adjust layout
-plt.tight_layout()
-plt.savefig("images.png", dpi=100, bbox_inches='tight')
+# Save visualizations to the output directory
+images_path = os.path.join(output_dir, 'images.png')
+plt.savefig(images_path, dpi=100, bbox_inches='tight')
 plt.close()
-print("All visualizations saved in 'images.png'.")
+print(f"Visualizations saved at: {images_path}")
 
 # Prepare dynamic prompt for README content
 data_description = f"The dataset contains **{df.shape[0]}** records and **{df.shape[1]}** columns. The columns include:\n- {', '.join(df.columns)}.\n"
@@ -267,6 +269,7 @@ for col in categorical_columns:
 insights = "\n".join(numerical_insights + categorical_insights)
 
 # Prepare the full README content
+readme_path = os.path.join(output_dir, 'README.md')
 readme_content = (
     "# Dataset Summary\n\n"
     "## Data Description\n"
@@ -295,7 +298,7 @@ readme_content = (
 with open('README.md', 'w') as readme_file:
     readme_file.write(readme_content)
 
-print("Summary saved to README.md")
+print(f"README.md saved at: {readme_path}")
 
 # Prepare data for API request visualizations
 
