@@ -18,6 +18,14 @@ import requests
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Ensure the script's directory is the working directory
+script_dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(script_dir)
+
+# Create output directory
+output_dir = "output"
+os.makedirs(output_dir, exist_ok=True)
+
 # Load environment variables from the .env file
 load_dotenv()
 
